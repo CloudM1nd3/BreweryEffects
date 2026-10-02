@@ -1,0 +1,12 @@
+name: BreweryEffects
+version: '${version}'
+main: org.cloudplugins.breweryEffects.BreweryEffects
+api-version: '1.21.11'
+commands:
+  brewfx:
+    description: Console-only effects for Brewery recipes
+    permission: brewfx.use
+permissions:
+  brewfx.use:
+    description: Nobody should have this; the console bypasses permissions
+    default: op

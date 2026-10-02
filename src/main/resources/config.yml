@@ -1,0 +1,33 @@
+# Эффекты для /brewfx <эффект> <ник>. Вызывается только из консоли.
+# sounds:    sound (id без minecraft:), category, volume, pitch
+# particles: particle (id), ox/oy/oz (смещение от игрока), dx/dy/dz (разброс), speed, count
+# teleport:  x/y/z (смещение от текущей позиции игрока)
+effects:
+  molot:
+    sounds:
+      - {sound: entity.lightning_bolt.thunder, category: master, volume: 1.0, pitch: 1.0}
+    particles:
+      - {particle: electric_spark, ox: 0, oy: 1, oz: 0, dx: 0.6, dy: 0.6, dz: 0.6, speed: 0.15, count: 50}
+
+  shepot:
+    sounds:
+      - {sound: entity.enderman.stare, category: master, volume: 0.9, pitch: 0.6}
+      - {sound: ambient.cave, category: master, volume: 1.0, pitch: 0.5}
+    particles:
+      - {particle: witch, ox: 0, oy: 1, oz: 0, dx: 0.5, dy: 0.7, dz: 0.5, speed: 0.05, count: 50}
+      - {particle: smoke, ox: 0, oy: 1, oz: 0, dx: 0.4, dy: 0.6, dz: 0.4, speed: 0.03, count: 35}
+
+  med:
+    sounds:
+      - {sound: entity.bee.loop, category: master, volume: 0.8, pitch: 1.2}
+      - {sound: entity.bee.pollinate, category: master, volume: 1.0, pitch: 1.0}
+    particles:
+      - {particle: heart, ox: 0, oy: 1.3, oz: 0, dx: 0.7, dy: 0.4, dz: 0.7, speed: 0.1, count: 20}
+      - {particle: happy_villager, ox: 0, oy: 1, oz: 0, dx: 0.6, dy: 0.5, dz: 0.6, speed: 0.05, count: 25}
+
+  kvas:
+    sounds:
+      - {sound: entity.ghast.scream, category: master, volume: 0.7, pitch: 1.3}
+      - {sound: entity.ender_dragon.flap, category: master, volume: 0.6, pitch: 1.5}
+    particles:
+      - {particle: reverse_portal, ox: 0, oy: 1, oz: 0, dx: 0.5, dy: 0.8, dz: 0.5, speed: 0.15, count: 60}
