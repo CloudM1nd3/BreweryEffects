@@ -6,7 +6,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Registry;
 import org.bukkit.SoundCategory;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,6 +15,8 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Map;
@@ -73,33 +74,81 @@ public final class BreweryEffects extends JavaPlugin implements CommandExecutor,
             return;
         }
 
-        Location base = player.getLocation();
-        World world = base.getWorld();
+        // Launch first, so sounds/particles at delay 0 play at the start position.
+        ConfigurationSection v = effect.getConfigurationSection("velocity");
+        if (v != null) {
+            player.setFallDistance(0f);
+            player.setVelocity(new Vector(v.getDouble("x"), v.getDouble("y"), v.getDouble("z")));
+        }
 
         for (Map<?, ?> m : effect.getMapList("sounds")) {
-            world.playSound(base, str(m, "sound", ""), category(str(m, "category", "master")),
-                    (float) num(m, "volume", 1), (float) num(m, "pitch", 1));
+            later((long) num(m, "delay", 0), () -> playSound(player, m));
         }
 
         for (Map<?, ?> m : effect.getMapList("particles")) {
-            String key = str(m, "particle", "").toLowerCase();
-            Particle particle = Registry.PARTICLE_TYPE.get(NamespacedKey.minecraft(key));
-            if (particle == null) {
-                getLogger().warning("Unknown particle: " + key);
-                continue;
-            }
-            Location at = base.clone().add(num(m, "ox", 0), num(m, "oy", 0), num(m, "oz", 0));
-            try {
-                world.spawnParticle(particle, at, (int) num(m, "count", 1),
-                        num(m, "dx", 0), num(m, "dy", 0), num(m, "dz", 0), num(m, "speed", 0));
-            } catch (IllegalArgumentException ex) {
-                getLogger().warning("Particle " + key + " needs extra data and is not supported: " + ex.getMessage());
-            }
+            later((long) num(m, "delay", 0), () -> spawnParticle(player, m));
+        }
+
+        // Repeating particles that follow the player (e.g. a flame trail while flying up).
+        for (Map<?, ?> m : effect.getMapList("trail")) {
+            final int ticks = (int) num(m, "ticks", 20);
+            final int interval = Math.max(1, (int) num(m, "interval", 2));
+            final long delay = (long) num(m, "delay", 0);
+            new BukkitRunnable() {
+                int elapsed = 0;
+
+                @Override
+                public void run() {
+                    if (!player.isOnline() || elapsed >= ticks) {
+                        cancel();
+                        return;
+                    }
+                    spawnParticle(player, m);
+                    elapsed += interval;
+                }
+            }.runTaskTimer(this, delay, interval);
         }
 
         ConfigurationSection tp = effect.getConfigurationSection("teleport");
         if (tp != null) {
+            Location base = player.getLocation();
             player.teleportAsync(base.clone().add(tp.getDouble("x"), tp.getDouble("y"), tp.getDouble("z")));
+        }
+    }
+
+    private void later(long delay, Runnable task) {
+        if (delay <= 0) {
+            task.run();
+        } else {
+            Bukkit.getScheduler().runTaskLater(this, task, delay);
+        }
+    }
+
+    private void playSound(Player player, Map<?, ?> m) {
+        if (!player.isOnline()) {
+            return;
+        }
+        Location at = player.getLocation();
+        at.getWorld().playSound(at, str(m, "sound", ""), category(str(m, "category", "master")),
+                (float) num(m, "volume", 1), (float) num(m, "pitch", 1));
+    }
+
+    private void spawnParticle(Player player, Map<?, ?> m) {
+        if (!player.isOnline()) {
+            return;
+        }
+        String key = str(m, "particle", "").toLowerCase();
+        Particle particle = Registry.PARTICLE_TYPE.get(NamespacedKey.minecraft(key));
+        if (particle == null) {
+            getLogger().warning("Unknown particle: " + key);
+            return;
+        }
+        Location at = player.getLocation().add(num(m, "ox", 0), num(m, "oy", 0), num(m, "oz", 0));
+        try {
+            at.getWorld().spawnParticle(particle, at, (int) num(m, "count", 1),
+                    num(m, "dx", 0), num(m, "dy", 0), num(m, "dz", 0), num(m, "speed", 0));
+        } catch (IllegalArgumentException ex) {
+            getLogger().warning("Particle " + key + " needs extra data and is not supported: " + ex.getMessage());
         }
     }
 

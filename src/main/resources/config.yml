@@ -1,6 +1,8 @@
 # Эффекты для /brewfx <эффект> <ник>. Вызывается только из консоли.
-# sounds:    sound (id без minecraft:), category, volume, pitch
-# particles: particle (id), ox/oy/oz (смещение от игрока), dx/dy/dz (разброс), speed, count
+# sounds:    sound (id без minecraft:), category, volume, pitch, delay (тики, необязательно)
+# particles: particle (id), ox/oy/oz (смещение от игрока), dx/dy/dz (разброс), speed, count, delay
+# trail:     как particles, но повторяется и следует за игроком: ticks (сколько длится), interval (раз в сколько тиков), delay
+# velocity:  x/y/z — толчок игроку (y: 1.35 примерно 10 блоков вверх)
 # teleport:  x/y/z (смещение от текущей позиции игрока)
 effects:
   molot:
@@ -31,3 +33,17 @@ effects:
       - {sound: entity.ender_dragon.flap, category: master, volume: 0.6, pitch: 1.5}
     particles:
       - {particle: reverse_portal, ox: 0, oy: 1, oz: 0, dx: 0.5, dy: 0.8, dz: 0.5, speed: 0.15, count: 60}
+
+  magmovuha:
+    velocity: {x: 0, y: 1.35, z: 0}
+    sounds:
+      - {sound: entity.ghast.shoot, category: master, volume: 1.0, pitch: 0.8}
+      - {sound: item.firecharge.use, category: master, volume: 1.0, pitch: 0.7}
+      - {sound: entity.generic.explode, category: master, volume: 0.6, pitch: 1.4, delay: 2}
+    particles:
+      - {particle: explosion, ox: 0, oy: 0.2, oz: 0, dx: 0.3, dy: 0.1, dz: 0.3, speed: 0, count: 3}
+      - {particle: flame, ox: 0, oy: 0, oz: 0, dx: 0.4, dy: 0.1, dz: 0.4, speed: 0.15, count: 40}
+    trail:
+      - {particle: flame, ox: 0, oy: 0.1, oz: 0, dx: 0.25, dy: 0.1, dz: 0.25, speed: 0.02, count: 8, ticks: 40, interval: 2}
+      - {particle: lava, ox: 0, oy: 0.1, oz: 0, dx: 0.3, dy: 0.1, dz: 0.3, speed: 0, count: 2, ticks: 40, interval: 2}
+      - {particle: large_smoke, ox: 0, oy: 0, oz: 0, dx: 0.2, dy: 0.1, dz: 0.2, speed: 0.01, count: 3, ticks: 60, interval: 3}
